@@ -40,4 +40,6 @@ mirroring real SOC visibility constraints
 ## Author
 **Mojaki Tjeeka**  
 BSc (Hons) Computing — Networking & Infrastructure Management  
+Certificate — Cyber Threat Management 
+Certificate — Junior Cybersecurity Analyst Career Path Exam
 mojakitjeeka@gmail.com
