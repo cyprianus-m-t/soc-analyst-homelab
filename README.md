@@ -12,7 +12,7 @@ All attacks are performed in an isolated VMware environment.
 | Ubuntu Server | Wazuh SIEM/XDR | 192.2.42.135 |
 | Windows Server 2022 | Domain Controller (AD DS) | 192.2.42.136 |
 | Windows 11 | Monitored Endpoint (domain-joined) | 192.2.42.137 |
-| Kali Linux | Attacker Machine | 192.2.42.140 |
+| Kali Linux | Attacker Machine (on a seperate host)| 192.2.42.140 |
 
 **Network:** VMware bridged — 192.2.42.0/24  
 **SIEM:** Wazuh (open-source XDR/SIEM)  
