@@ -9,10 +9,10 @@ All attacks are performed in an isolated VMware environment.
 
 | Machine | Role | IP |
 |---|---|---|
-| Ubuntu Server | Wazuh SIEM/XDR | 192.2.42.135 |
+| Ubuntu Server | Wazuh SIEM/XDR | 192.2.42.141 |
 | Windows Server 2022 | Domain Controller (AD DS) | 192.2.42.136 |
 | Windows 11 | Monitored Endpoint (domain-joined) | 192.2.42.137 |
-| Kali Linux | Attacker Machine (on a seperate host)| 192.2.42.140 |
+| Kali Linux | Attacker Machine (on a seperate host)| 192.2.42.156 |
 
 **Network:** VMware bridged — 192.2.42.0/24  
 **SIEM:** Wazuh (open-source XDR/SIEM)  
@@ -31,7 +31,7 @@ mirroring real SOC visibility constraints
 
 ## Tools & Technologies
 - Wazuh SIEM/XDR
-- Windows Server 2022 / Active Directory
+- Windows Server 2012 / Active Directory
 - Kali Linux / Hydra / Nmap
 - VMware Workstation
 - MITRE ATT&CK Framework
