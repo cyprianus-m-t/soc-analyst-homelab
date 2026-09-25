@@ -25,7 +25,7 @@
 
 |Component|Role|IP Address|Agent ID|
 |-|-|-|-|
-|Ubuntu Server|Wazuh Manager v4.14.7|192.2.42.141|N/A (Manager)|
+|Ubuntu Server|Wazuh Manager v4.14.7|192.2.42.142|N/A (Manager)|
 |Win-Server|Windows Server 2012 AD/DC|192.2.42.136|Agent-001|
 |Win-11-Agent|Windows 11 Domain Endpoint|192.2.42.137|Agent-002|
 
