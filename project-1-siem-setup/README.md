@@ -29,7 +29,7 @@
 |Win-Server|Windows Server 2012 AD/DC|192.2.42.136|Agent-001|
 |Win-11-Agent|Windows 11 Domain Endpoint|192.2.42.137|Agent-002|
 
-> \*\*Note:\*\* All machines are on a bridged VMware LAN (`192.2.42.0/24`). See ![`network-diagram.png`](./network-diagram.png) for full architecture.
+> \*\*Note:\*\* All machines are on a bridged VMware LAN (`192.2.42.0/24`). See ![`network-diagram.png`](./lab-setup/network-diagram.png) for full architecture.
 
 \---
 
