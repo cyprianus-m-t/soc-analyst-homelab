@@ -39,9 +39,9 @@
 
 Opened the Wazuh dashboard via browser on the host machine and navigated to the Agents section. Confirmed both agents were reporting **Active** status with correct IP addresses and agent IDs as listed in the environment table above.
 
-!\[Wazuh Agents page showing both agents Active](./screenshots/01--wazuh-agents.png)
+![Wazuh Agents page showing both agents Active](./screenshots/01--wazuh-agents.png)
 
-!\[Active agent detail showing Agent ID, IP, OS and last keep-alive](./screenshots/02--agent-status.png)
+![Active agent detail showing Agent ID, IP, OS and last keep-alive](./screenshots/02--agent-status.png)
 
 \---
 
@@ -57,9 +57,9 @@ Navigated to the Windows audit policy on both machines to ensure all relevant se
 
 > ⚠️ \*\*Note:\*\* On Windows 11, `secpol.msc` was not accessible directly as a domain user. Resolved by opening PowerShell as Administrator and executing `secpol.msc` from the elevated prompt. See \[Troubleshooting](#troubleshooting-log) section for full detail.
 
-!\[Windows 11 Local Security Policy showing audit categories enabled for Success and Failure](./screenshots/03--win-11-audit%20policy.png)
+![Windows 11 Local Security Policy showing audit categories enabled for Success and Failure](./screenshots/03--win-11-audit%20policy.png)
 
-!\[Windows Server Domain Controller audit policy configuration](./screenshots/04--win-server-audit-policy.png)
+![Windows Server Domain Controller audit policy configuration](./screenshots/04--win-server-audit-policy.png)
 
 \---
 
@@ -73,9 +73,9 @@ gpupdate /force
 
 Expected output: `Computer Policy update has completed successfully.` and `User Policy update has completed successfully.`
 
-!\[Win11 gpupdate /force successful completion output](./screenshots/05--Win11-gpupdate.png)
+![Win11 gpupdate /force successful completion output](./screenshots/05--Win11-gpupdate.png)
 
-!\[Windows Server gpupdate /force successful completion output](./screenshots/06--win-server-pgupdate.png)
+![Windows Server gpupdate /force successful completion output](./screenshots/06--win-server-pgupdate.png)
 
 \---
 
@@ -92,7 +92,7 @@ Once resolved, Event Viewer (`eventvwr.msc`) confirmed the following event IDs w
 |4625|Failed logon (generated deliberately in Step 5)|
 |4688|New process created|
 
-!\[Windows 11 Security Event Log populated with recent security events](./screenshots/07--win-11-security-event-log.png)
+![Windows 11 Security Event Log populated with recent security events](./screenshots/07--win-11-security-event-log.png)
 
 \---
 
@@ -108,7 +108,7 @@ Logged off and back on to the Windows 11 machine using the domain account. This 
 
 Attempted to access a network share on the Windows Server using deliberately incorrect credentials three consecutive times. This generates Event ID 4625 (failed logon) on the Domain Controller, attributable to the Windows 11 source IP (`192.2.42.137`).
 
-!\[Wazuh event list showing Event ID 4625 failed logon events with source IP and targeted username](./screenshots/08--event-4625.png)
+![Wazuh event list showing Event ID 4625 failed logon events with source IP and targeted username](./screenshots/08--event-4625.png)
 
 \---
 
@@ -116,9 +116,9 @@ Attempted to access a network share on the Windows Server using deliberately inc
 
 Navigated to the Wazuh Alerts section and confirmed that the repeated failed logon events triggered Wazuh's built-in detection rule. **Rule ID 60106** fired, generating an alert for multiple authentication failures — demonstrating that Wazuh's correlation engine is active and functioning.
 
-!\[Wazuh Alerts view showing rule 60106 alert for repeated failed authentication](./screenshots/09--rule-60106-alert.png)
+![Wazuh Alerts view showing rule 60106 alert for repeated failed authentication](./screenshots/09--rule-60106-alert.png)
 
-!\[Win-Server agent event stream showing AD-related events including Kerberos 4768 and 4769](./screenshots/10--winserver-event-stream.png)
+![Win-Server agent event stream showing AD-related events including Kerberos 4768 and 4769](./screenshots/10--winserver-event-stream.png)
 
 \---
 
@@ -223,7 +223,7 @@ Four issues were encountered and independently resolved during this project.
 |9|`09--rule-60106-alert.png`|Wazuh Alert — Rule 60106 triggered|
 |10|`10--winserver-event-stream.png`|Win-Server agent event stream showing AD events|
 
-> All screenshots are in the \[`/screenshots`](./screenshots/) folder of this repository.
+> All screenshots are in the [`/screenshots`](./screenshots/) folder of this repository.
 
 \---
 
