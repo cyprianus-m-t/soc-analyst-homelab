@@ -30,7 +30,7 @@
 |-|-|-|-|
 |Kali Linux|Attacker — simulated threat actor|192.2.42.156|N/A (no agent)|
 |Win-Server|Windows Server AD/DC|192.2.42.136|Agent-001|
-|Win-11|Windows 11 domain-joined endpoint|192.2.42.137 (per Wazuh `agent.ip`)|Agent-002|
+|Win-11|Windows 11 domain-joined endpoint|192.2.42.137|Agent-002|
 |Ubuntu Server|Wazuh Manager v4.14.7|192.2.42.142|N/A (Manager)|
 
 > All machines are on a bridged VMware LAN (`192.2.42.0/24`). Kali has no Wazuh agent installed — all detections are defender-side only, matching real-world SOC visibility constraints.
