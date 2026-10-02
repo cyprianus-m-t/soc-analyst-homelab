@@ -1,4 +1,4 @@
-# Project 2 — Brute Force Attack Detection & Custom Rule Development
+# Project 2 — Brute Force Attack Detection \& Custom Rule Development
 
 **SOC Home Lab | Portfolio Project 2 of 5**
 
@@ -8,9 +8,9 @@
 |**Date**|02 October 2026|
 |**Environment**|Wazuh v4.14.7 · Kali Linux · Windows Server (AD/DC) · Windows 11|
 |**Objective**|Simulate a credential brute force attack against both the Domain Controller and a domain-joined Windows 11 endpoint, confirm detection via Wazuh's built-in ruleset, and develop custom correlation rules for high-severity alerting|
-|**MITRE ATT&CK**|T1110 — Brute Force · T1110.001 — Password Guessing|
+|**MITRE ATT\&CK**|T1110 — Brute Force · T1110.001 — Password Guessing|
 
----
+\---
 
 ## Skills Demonstrated
 
@@ -19,10 +19,10 @@
 * Windows Security Event log analysis (Event IDs 4625, 4624, 4634, 4673)
 * SIEM alert triage and event field interpretation
 * Custom Wazuh detection rule development with frequency correlation
-* MITRE ATT&CK framework mapping at technique and sub-technique level
+* MITRE ATT\&CK framework mapping at technique and sub-technique level
 * Critical evaluation of SIEM enrichment output (GeoIP anomaly)
 
----
+\---
 
 ## Network Environment
 
@@ -30,12 +30,12 @@
 |-|-|-|-|
 |Kali Linux|Attacker — simulated threat actor|192.2.42.156|N/A (no agent)|
 |Win-Server|Windows Server AD/DC|192.2.42.136|Agent-001|
-|Win-11|Windows 11 domain-joined endpoint|192.2.42.137|Agent-002|
+|Win-11|Windows 11 domain-joined endpoint|192.2.42.137 (per Wazuh `agent.ip`)|Agent-002|
 |Ubuntu Server|Wazuh Manager v4.14.7|192.2.42.142|N/A (Manager)|
 
 > All machines are on a bridged VMware LAN (`192.2.42.0/24`). Kali has no Wazuh agent installed — all detections are defender-side only, matching real-world SOC visibility constraints.
 
----
+\---
 
 ## Steps Taken
 
@@ -44,30 +44,30 @@
 Built a custom 8-entry password wordlist on Kali with the correct credential for the account `jay` embedded at position 6, to simulate a realistic (not instant) brute force against a single targeted account rather than a password spray.
 
 ```bash
-cat ~/lab-wordlist.txt
+cat \~/lab-wordlist.txt
 ```
 
----
+\---
 
 ### Step 2 — SMB Brute Force Against the Domain Controller
 
 Ran Hydra from Kali against the DC over SMB (port 445):
 
 ```bash
-hydra -l jay -P ~/lab-wordlist.txt smb://192.2.42.136
+hydra -l jay -P \~/lab-wordlist.txt smb://192.2.42.136
 ```
 
 Confirmed the attack landed on both sides:
 
 **Host side (Windows Event Viewer, DC):** filtered the Security log to Event ID 4625 and confirmed 42 matching events, Task Category *Logon*, Keywords *Audit Failure*, Subject `NULL SID`, Computer `win-server.cclabs.local`.
 
-![Windows Event Viewer filtered to Event ID 4625 on the Domain Controller](./screenshots/b-f-a-004.png)
+!\[Windows Event Viewer filtered to Event ID 4625 on the Domain Controller](./screenshots/b-f-a-004.png)
 
-**SIEM side (Wazuh, Win-Server agent):** observed a dense burst of paired **60122** (*Logon Failure — Unknown user or bad password*) and **60104** (*Windows audit failure event*) alerts at Level 5, followed by **60106** (*Windows Logon Success*) and **60137** (*Windows User Logoff*) within ~2.3 seconds of the last failure.
+**SIEM side (Wazuh, Win-Server agent):** observed a dense burst of paired **60122** (*Logon Failure — Unknown user or bad password*) and **60104** (*Windows audit failure event*) alerts at Level 5, followed by **60106** (*Windows Logon Success*) and **60137** (*Windows User Logoff*) within \~2.3 seconds of the last failure.
 
-![Wazuh event list showing the 4625 failure burst followed by logon success and logoff](./screenshots/b-f-a-001.png)
+!\[Wazuh event list showing the 4625 failure burst followed by logon success and logoff](./screenshots/b-f-a-001.png)
 
-> ⚠️ **Note:** the Event Viewer timestamp (2:29:12 PM) is one minute behind the matching Wazuh burst (14:30:12). This is either an earlier manual attempt or a clock offset between the DC and the Wazuh manager — flagged for follow-up rather than assumed.
+> ⚠️ \*\*Note:\*\* the Event Viewer timestamp (2:29:12 PM) is one minute behind the matching Wazuh burst (14:30:12). This is either an earlier manual attempt or a clock offset between the DC and the Wazuh manager — flagged for follow-up rather than assumed.
 
 Expanded a 4625 event to confirm field-level parsing:
 
@@ -76,7 +76,7 @@ Expanded a 4625 event to confirm field-level parsing:
 |`system.eventID`|`4625`|Failed logon|
 |`targetUserName`|`jay`|Account under attack|
 |`ipAddress`|`192.2.42.156`|Kali attacker machine|
-|`workstationName`|`192.2.42.156`|Raw IP, no hostname supplied by attacker|
+|`workstationName`|`\\\\192.2.42.156`|Raw IP, no hostname supplied by attacker|
 |`ipPort`|`46364` / `46384`|Ephemeral source port — one connection per attempt|
 |`authenticationPackageName` / `logonProcessName`|`NTLM` / `NtLmSsp`|SMB uses NTLM auth|
 |`logonType`|`3`|Network logon — confirms SMB|
@@ -84,25 +84,25 @@ Expanded a 4625 event to confirm field-level parsing:
 |`failureReason`|`%%2313`|Unknown user name or bad password|
 |`subjectUserSid` / `targetUserSid`|`S-1-0-0`|Null SID — pre-authentication failure|
 
-![Expanded Event ID 4625 detail showing full field breakdown](./screenshots/b-f-a-002.png)
+!\[Expanded Event ID 4625 detail showing full field breakdown](./screenshots/b-f-a-002.png)
 
-> ⚠️ **Note:** `subStatus 0xc0000064` means the account name itself was not found (a wrong password for an existing account returns `0xc000006a`). The Win-11 evidence in Step 4 shows the real domain account is `CCLABSjay.reed`, so the 4624 success event should be opened and its `targetUserName`/`ipAddress` confirmed before describing the password as "recovered."
+> ⚠️ \*\*Note:\*\* `subStatus 0xc0000064` means the account name itself was not found (a wrong password for an existing account returns `0xc000006a`). The Win-11 evidence in Step 4 shows the real domain account is `CCLABS\\jay.reed`, so the 4624 success event should be opened and its `targetUserName`/`ipAddress` confirmed before describing the password as "recovered."
 
 Also observed follow-on activity in the same window — network share access (`67017`) and SQL-style database attach/detach events (`60798`/`60797`) — which do not appear to be attacker-driven and should be scoped out before being counted as part of the attack.
 
-![Wazuh showing network share access and database attach/detach events after the logon](./screenshots/b-f-a-003.png)
+!\[Wazuh showing network share access and database attach/detach events after the logon](./screenshots/b-f-a-003.png)
 
----
+\---
 
 ### Step 3 — Wazuh Built-In Correlation Confirmation
 
 Before any custom rule was written, Wazuh's own correlation engine detected the repeated failure pattern and fired **rule 60204** — *Multiple Windows Logon Failures* — at **Level 10**, with `frequency: 8` (eight parent-rule matches counted), mapped to **MITRE T1110** / Credential Access, and to NIST 800-53 (AU.14, AC.7, SI.4) and GDPR (IV.35.7.d, IV.32.2).
 
-![Wazuh alert detail for rule 60204, Multiple Windows Logon Failures, Level 10, MITRE T1110](./screenshots/b-f-a-multi-.png)
+!\[Wazuh alert detail for rule 60204, Multiple Windows Logon Failures, Level 10, MITRE T1110](./screenshots/b-f-a-multi-.png)
 
 This confirmed Wazuh's built-in ruleset alone was sufficient to flag the brute force pattern — the custom rules in Step 6 exist to raise the severity and correlate across both hosts into a single higher-fidelity alert.
 
----
+\---
 
 ### Step 4 — RDP Enablement and Attack Against the Windows 11 Endpoint
 
@@ -119,13 +119,13 @@ Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 Ran Hydra against the endpoint over RDP and SMB:
 
 ```bash
-hydra -l jay -P ~/lab-wordlist.txt rdp://192.2.42.137
+hydra -l jay -P \~/lab-wordlist.txt rdp://<192.2.42.137>
 
 ```
 
 Confirmed in Wazuh (Win-11 agent) a burst of **rule 60107** — *Failed attempt to perform a privileged operation* (Event ID 4673) — at Level 4, immediately followed by **67027** (*A process was created*):
 
-![Wazuh event list on Win-11 showing repeated rule 60107 alerts followed by process creation](./screenshots/b-f-a-005.png)
+!\[Wazuh event list on Win-11 showing repeated rule 60107 alerts followed by process creation](./screenshots/b-f-a-005.png)
 
 Expanded one alert to confirm the account and privilege context:
 
@@ -134,98 +134,98 @@ Expanded one alert to confirm the account and privilege context:
 |`rule.id` / `rule.level` / `rule.firedtimes`|`60107` / `4` / `84`|
 |`message`|"A privileged service was called." (Event ID 4673)|
 |`win.eventdata.privilegeList`|`SeTcbPrivilege`|
-|`win.eventdata.processName` / `processId`|`C:WindowsSystem32svchost.exe` / `0x390`|
+|`win.eventdata.processName` / `processId`|`C:\\Windows\\System32\\svchost.exe` / `0x390`|
 |`win.eventdata.subjectUserName` / `subjectDomainName`|`jay.reed` / `CCLABS`|
 |`rule.mitre.id` / `tactic`|`T1078` / Defense Evasion, Persistence, Privilege Escalation, Initial Access|
 
-![Wazuh document detail showing subjectUserName jay.reed, processName svchost.exe](./screenshots/b-f-a-006.png)
-![Wazuh document detail showing systemTime, providerName and severityValue AUDIT_FAILURE](./screenshots/b-f-a-007.png)
-![Wazuh document detail showing rule 60107, firedtimes 84, MITRE T1078 Valid Accounts](./screenshots/b-f-a-008.png)
+!\[Wazuh document detail showing subjectUserName jay.reed, processName svchost.exe](./screenshots/b-f-a-006.png)
+!\[Wazuh document detail showing systemTime, providerName and severityValue AUDIT\_FAILURE](./screenshots/b-f-a-007.png)
+!\[Wazuh document detail showing rule 60107, firedtimes 84, MITRE T1078 Valid Accounts](./screenshots/b-f-a-008.png)
 
-> ⚠️ **Note:** this evidence shows Event 4673 / rule 60107, which maps to **T1078 (Valid Accounts)** rather than T1110. The Event ID 4776 (local credential validation, `workstation: kali`) and Win-11 Event 4625 referenced in earlier planning notes were not captured in this evidence set and should either be re-captured or removed from the write-up. On a domain-joined Windows 11 host, NTLM validation attempts can log as 4776 in addition to 4625, which would give a second detection surface not present on the DC — but this needs its own screenshot before being presented as a finding.
+> ⚠️ \*\*Note:\*\* this evidence shows Event 4673 / rule 60107, which maps to \*\*T1078 (Valid Accounts)\*\* rather than T1110. The Event ID 4776 (local credential validation, `workstation: kali`) and Win-11 Event 4625 referenced in earlier planning notes were not captured in this evidence set and should either be re-captured or removed from the write-up. On a domain-joined Windows 11 host, NTLM validation attempts can log as 4776 in addition to 4625, which would give a second detection surface not present on the DC — but this needs its own screenshot before being presented as a finding.
 
----
+\---
 
 ### Step 5 — GeoIP Enrichment Review
 
 While triaging the DC alerts, reviewed Wazuh's GeoLocation enrichment for the attacker IP. Wazuh resolved `192.2.42.156` — a private RFC 1918 address — to a geolocation of **lat 37.751, lon -97.822 (United States)**.
 
-> ⚠️ **Finding:** this is a false enrichment. Private IP ranges cannot be accurately geolocated and should never resolve to a real-world geography. In a production SOC this would constitute misleading threat intelligence and could cause an analyst to misclassify an internal lateral-movement event as an external attack. GeoIP output must be corroborated with DHCP logs and asset inventory before being used as evidence.
+> ⚠️ \*\*Finding:\*\* this is a false enrichment. Private IP ranges cannot be accurately geolocated and should never resolve to a real-world geography. In a production SOC this would constitute misleading threat intelligence and could cause an analyst to misclassify an internal lateral-movement event as an external attack. GeoIP output must be corroborated with DHCP logs and asset inventory before being used as evidence.
 
 *(Screenshot of the GeoLocation field was not captured in this evidence set — flagged for re-capture.)*
 
----
+\---
 
 ### Step 6 — Custom Detection Rule Development
 
-Wrote two correlation rules in `/var/ossec/etc/rules/local_rules.xml` to raise the DC/endpoint failure patterns to a single high-severity, MITRE-tagged alert:
+Wrote two correlation rules in `/var/ossec/etc/rules/local\_rules.xml` to raise the DC/endpoint failure patterns to a single high-severity, MITRE-tagged alert:
 
 ```xml
 
 
-<group name="local_rules,">
+<group name="local\_rules,">
 
 
 
- <!-- Repeated failed Windows logons from the same IP -->
+&#x20; <!-- Repeated failed Windows logons from the same IP -->
 
- <rule id="100001" level="12" frequency="5" timeframe="120">
+&#x20; <rule id="100001" level="12" frequency="5" timeframe="120">
 
-  <if_matched_sid>60122</if_matched_sid>
+&#x20;   <if\_matched\_sid>60122</if\_matched\_sid>
 
-   <same_field>win.eventdata.ipAddress</same_field>
+&#x20;   <same\_field>win.eventdata.ipAddress</same\_field>
 
-   <description>Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes</description>
+&#x20;   <description>Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes</description>
 
-   <mitre>
+&#x20;   <mitre>
 
-   <id>T1110</id>
+&#x20;     <id>T1110</id>
 
-   </mitre>
+&#x20;   </mitre>
 
-   <group>authentication_failures,brute_force,</group>
+&#x20;   <group>authentication\_failures,brute\_force,</group>
 
- </rule>
-
-
-
- <!-- Identify an individual failed RDP logon -->
-
- <rule id="100010" level="5">
-
-   <if_sid>60105</if_sid>
-
-   <field name="win.system.eventID">^4625$</field>
-
-   <field name="win.eventdata.logonType">^10$</field>
-
-   <description>Windows RDP Logon Failure</description>
-
-   <group>authentication_failures,rdp,</group>
-
- </rule>
+&#x20; </rule>
 
 
 
- <!-- Repeated failed RDP logons from the same IP -->
+&#x20; <!-- Identify an individual failed RDP logon -->
 
- <rule id="100002" level="12" frequency="5" timeframe="120">
+&#x20; <rule id="100010" level="5">
 
-   <if_matched_sid>100010</if_matched_sid>
+&#x20;   <if\_sid>60105</if\_sid>
 
-   <same_field>win.eventdata.ipAddress</same_field>
+&#x20;   <field name="win.system.eventID">^4625$</field>
 
-   <description>Brute Force Attack: Repeated RDP failures from the same IP within 2 minutes</description>
+&#x20;   <field name="win.eventdata.logonType">^10$</field>
 
-   <mitre>
+&#x20;   <description>Windows RDP Logon Failure</description>
 
-     <id>T1110.001</id>
+&#x20;   <group>authentication\_failures,rdp,</group>
 
-   </mitre>
+&#x20; </rule>
 
-   <group>authentication_failures,brute_force,rdp,</group>
 
-</rule>
+
+&#x20; <!-- Repeated failed RDP logons from the same IP -->
+
+&#x20; <rule id="100002" level="12" frequency="5" timeframe="120">
+
+&#x20;   <if\_matched\_sid>100010</if\_matched\_sid>
+
+&#x20;   <same\_field>win.eventdata.ipAddress</same\_field>
+
+&#x20;   <description>Brute Force Attack: Repeated RDP failures from the same IP within 2 minutes</description>
+
+&#x20;   <mitre>
+
+&#x20;     <id>T1110.001</id>
+
+&#x20;   </mitre>
+
+&#x20;   <group>authentication\_failures,brute\_force,rdp,</group>
+
+&#x20; </rule>
 
 
 
@@ -237,13 +237,13 @@ Wrote two correlation rules in `/var/ossec/etc/rules/local_rules.xml` to raise t
 |`level`|12|High severity (Wazuh scale 0–15); triggers `mail: true`|
 |`frequency`|5|Triggers after 5 parent rule matches|
 |`timeframe`|120|Within a 120-second window|
-|`if_matched_sid`|60122 / 60104|Parent rules to correlate against|
-|`same_source_ip`|—|Only counts failures from identical source IP|
-|`mitre id`|T1110 / T1110.001|MITRE ATT&CK technique and sub-technique|
+|`if\_matched\_sid`|60122 / 60104|Parent rules to correlate against|
+|`same\_source\_ip`|—|Only counts failures from identical source IP|
+|`mitre id`|T1110 / T1110.001|MITRE ATT\&CK technique and sub-technique|
 
-> **Design note:** rule 100001 (`if_matched_sid: 60122`) fires on either host, since both Win-Server and Win-11 raise rule 60122 on failed logons — a single rule gives domain-wide coverage.
+> \*\*Design note:\*\* rule 100001 (`if\_matched\_sid: 60122`) fires on either host, since both Win-Server and Win-11 raise rule 60122 on failed logons — a single rule gives domain-wide coverage.
 
-> ⚠️ **Known limitation:** rule 60104 fires on *every* Windows audit failure, not just RDP, so rule 100002 is not currently RDP-specific. To scope it correctly, add a condition on `win.system.eventID` (e.g. 4776) or `logonType`, and update the description accordingly.
+> ⚠️ \*\*Known limitation:\*\* rule 60104 fires on \*every\* Windows audit failure, not just RDP, so rule 100002 is not currently RDP-specific. To scope it correctly, add a condition on `win.system.eventID` (e.g. 4776) or `logonType`, and update the description accordingly.
 
 ```bash
 # Validate rule syntax
@@ -256,9 +256,9 @@ sudo systemctl restart wazuh-manager
 sudo systemctl status wazuh-manager
 ```
 
-*(Screenshot of `local_rules.xml` open in nano was not captured in this evidence set — flagged for re-capture.)*
+*(Screenshot of `local\_rules.xml` open in nano was not captured in this evidence set — flagged for re-capture.)*
 
----
+\---
 
 ### Step 7 — Custom Rule Validation
 
@@ -269,17 +269,17 @@ Re-ran the SMB attack against the DC and confirmed rule **100001** fired at **Le
 |`rule.id` / `rule.level`|`100001` / `12`|
 |`rule.firedtimes`|`2`|
 |`rule.mail`|`true`|
-|`rule.groups`|`local_rules`, `authentication_failures`, `brute_force`|
+|`rule.groups`|`local\_rules`, `authentication\_failures`, `brute\_force`|
 |`rule.mitre`|T1110 — Brute Force, Credential Access|
 
-![Wazuh alert list showing custom rule 100001 firing at Level 12, with 24-hour histogram](./screenshots/b-f-a-009.png)
-![Wazuh document detail for rule 100001 showing groups, MITRE T1110, Credential Access tactic](./screenshots/b-f-a-010.png)
+!\[Wazuh alert list showing custom rule 100001 firing at Level 12, with 24-hour histogram](./screenshots/b-f-a-009.png)
+!\[Wazuh document detail for rule 100001 showing groups, MITRE T1110, Credential Access tactic](./screenshots/b-f-a-010.png)
 
 The 24-hour view for the Win-Server agent showed 1,565 hits with volume ramping sharply from midday onward — consistent with repeated attack runs during rule testing.
 
 *(Screenshot of rule 100002 firing was not captured in this evidence set — flagged for re-capture.)*
 
----
+\---
 
 ## Troubleshooting Log
 
@@ -297,9 +297,9 @@ No blocking technical issues were encountered during this project. Two analytica
 |**Status**|Open.|
 |**Next step**|Add an `eventID` or `logonType` condition scoped to RDP-originated failures (e.g. Event 4776) and re-test.|
 
----
+\---
 
-## Findings & Results
+## Findings \& Results
 
 ### ✅ Objectives Met
 
@@ -315,7 +315,7 @@ No blocking technical issues were encountered during this project. Two analytica
 * NTLM over SMB from a workstation presenting only a raw IP (no hostname) is itself an anomaly worth baselining against normal DC traffic
 * The Domain Controller and the Windows 11 endpoint surface different event types for the same style of attack (4625/60122 on the DC vs. 4673/60107 on the endpoint) — detection coverage needs to account for both
 * GeoIP enrichment is unreliable for RFC 1918 addresses and must be corroborated with DHCP logs and asset inventory, not trusted as standalone evidence
-* Several items of evidence referenced in the attack plan (Win-11 Event 4776, rule 100002 firing, the `local_rules.xml` file itself, the GeoLocation field) were not present in the screenshots reviewed and are tracked above rather than claimed without evidence
+* Several items of evidence referenced in the attack plan (Win-11 Event 4776, rule 100002 firing, the `local\_rules.xml` file itself, the GeoLocation field) were not present in the screenshots reviewed and are tracked above rather than claimed without evidence
 
 ### Wazuh Alerts Generated
 
@@ -327,7 +327,7 @@ No blocking technical issues were encountered during this project. Two analytica
 |**100001** (custom)|Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes|**High (12)**|5+ rule-60122 matches from the same source IP within 120s|
 |**100002** (custom)|Brute Force Attack: 5+ RDP credential failures from same source within 2 minutes|**High (12)**|5+ rule-60104 matches from the same source IP within 120s *(scoping gap noted above)*|
 
----
+\---
 
 ## Skills Mapped to SOC Analyst Job Requirements
 
@@ -339,10 +339,10 @@ No blocking technical issues were encountered during this project. Two analytica
 |Proactively detecting and responding to threats|Wrote and validated custom Wazuh correlation rules to flag future attacks before they succeed|
 |SIEM log collection and analysis|Parsed Windows event fields (`targetUserName`, `ipAddress`, `logonType`, status/substatus codes) and cross-checked Wazuh against Windows Event Viewer|
 |Scripting — PowerShell|Used PowerShell to enable RDP and the associated firewall rule on Windows 11|
-|MITRE ATT&CK knowledge|Mapped detections to T1110 and T1110.001 at sub-technique level; identified an additional T1078 surface on Win-11|
+|MITRE ATT\&CK knowledge|Mapped detections to T1110 and T1110.001 at sub-technique level; identified an additional T1078 surface on Win-11|
 |Applying expertise and advanced technologies|Deployed and validated custom Wazuh correlation rules against live attack traffic|
 
----
+\---
 
 ## Evidence Index
 
@@ -355,16 +355,16 @@ No blocking technical issues were encountered during this project. Two analytica
 |5|`b-f-a-multi-.png`|Wazuh — rule 60204 detail, Level 10, MITRE T1110, NIST/GDPR mappings|
 |6|`b-f-a-005.png`|Wazuh — rule 60107 / 67027 burst on Win-11|
 |7|`b-f-a-006.png`|Wazuh — document detail, `jay.reed`, `svchost.exe`, `SeTcbPrivilege`|
-|8|`b-f-a-007.png`|Wazuh — document detail, `systemTime`, provider fields, `AUDIT_FAILURE`|
+|8|`b-f-a-007.png`|Wazuh — document detail, `systemTime`, provider fields, `AUDIT\_FAILURE`|
 |9|`b-f-a-008.png`|Wazuh — rule 60107 detail, `firedtimes 84`, MITRE T1078|
 |10|`b-f-a-009.png`|Wazuh — custom rule 100001 firing at Level 12, 24-hour histogram|
 |11|`b-f-a-010.png`|Wazuh — custom rule 100001 JSON detail, groups, MITRE T1110|
 
-> Not yet captured: `local_rules.xml` in nano, rule 100002 firing, Win-11 Event 4776/4625, DC Event 4624 detail, GeoLocation field. See Troubleshooting Log and Step notes above.
+> Not yet captured: `local\_rules.xml` in nano, rule 100002 firing, Win-11 Event 4776/4625, DC Event 4624 detail, GeoLocation field. See Troubleshooting Log and Step notes above.
 
-> All screenshots are in the [`/screenshots`](./screenshots/) folder of this repository.
+> All screenshots are in the \[`/screenshots`](./screenshots/) folder of this repository.
 
----
+\---
 
 *Part of the* [*SOC Home Lab Portfolio*](../README.md) *by Mojaki Tjeeka*
 
