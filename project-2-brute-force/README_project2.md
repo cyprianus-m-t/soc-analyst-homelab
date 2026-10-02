@@ -229,7 +229,8 @@ Wrote two correlation rules in `/var/ossec/etc/rules/local\_rules.xml` to raise 
 
 
 
-</group>```
+</group>
+```
 
 |Parameter|Value|Meaning|
 |-|-|-|
