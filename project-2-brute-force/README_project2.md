@@ -44,7 +44,7 @@
 Built a custom 8-entry password wordlist on Kali with the correct credential for the account `jay` embedded at position 6, to simulate a realistic (not instant) brute force against a single targeted account rather than a password spray.
 
 ```bash
-cat \~/lab-wordlist.txt
+cat ~/lab-wordlist.txt
 ```
 
 \---
@@ -54,7 +54,7 @@ cat \~/lab-wordlist.txt
 Ran Hydra from Kali against the DC over SMB (port 445):
 
 ```bash
-hydra -l jay -P \~/lab-wordlist.txt smb://192.2.42.136
+hydra -l jay -P ~/lab-wordlist.txt smb://192.2.42.136
 ```
 
 Confirmed the attack landed on both sides:
@@ -76,7 +76,7 @@ Expanded a 4625 event to confirm field-level parsing:
 |`system.eventID`|`4625`|Failed logon|
 |`targetUserName`|`jay`|Account under attack|
 |`ipAddress`|`192.2.42.156`|Kali attacker machine|
-|`workstationName`|`\\\\192.2.42.156`|Raw IP, no hostname supplied by attacker|
+|`workstationName`|`192.2.42.156`|Raw IP, no hostname supplied by attacker|
 |`ipPort`|`46364` / `46384`|Ephemeral source port — one connection per attempt|
 |`authenticationPackageName` / `logonProcessName`|`NTLM` / `NtLmSsp`|SMB uses NTLM auth|
 |`logonType`|`3`|Network logon — confirms SMB|
