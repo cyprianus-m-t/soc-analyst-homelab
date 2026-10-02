@@ -254,8 +254,7 @@ sudo systemctl restart wazuh-manager
 # Confirm running
 sudo systemctl status wazuh-manager
 ```
-
-*(Screenshot of `local\_rules.xml` open in nano was not captured in this evidence set — flagged for re-capture.)*
+!\[Screenshot of `local_rules.xml` open in nano](./screenshots/b-f-a-003.png)
 
 \---
 
