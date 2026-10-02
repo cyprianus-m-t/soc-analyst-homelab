@@ -167,65 +167,65 @@ Wrote two correlation rules in `/var/ossec/etc/rules/local\_rules.xml` to raise 
 
 
 
-&#x20; <!-- Repeated failed Windows logons from the same IP -->
+ <!-- Repeated failed Windows logons from the same IP -->
 
-&#x20; <rule id="100001" level="12" frequency="5" timeframe="120">
+ <rule id="100001" level="12" frequency="5" timeframe="120">
 
-&#x20;   <if\_matched\_sid>60122</if\_matched\_sid>
+   <if\_matched\_sid>60122</if\_matched\_sid>
 
-&#x20;   <same\_field>win.eventdata.ipAddress</same\_field>
+   <same\_field>win.eventdata.ipAddress</same\_field>
 
-&#x20;   <description>Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes</description>
+   <description>Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes</description>
 
-&#x20;   <mitre>
+   <mitre>
 
-&#x20;     <id>T1110</id>
+     <id>T1110</id>
 
-&#x20;   </mitre>
+   </mitre>
 
-&#x20;   <group>authentication\_failures,brute\_force,</group>
+   <group>authentication\_failures,brute\_force,</group>
 
-&#x20; </rule>
-
-
-
-&#x20; <!-- Identify an individual failed RDP logon -->
-
-&#x20; <rule id="100010" level="5">
-
-&#x20;   <if\_sid>60105</if\_sid>
-
-&#x20;   <field name="win.system.eventID">^4625$</field>
-
-&#x20;   <field name="win.eventdata.logonType">^10$</field>
-
-&#x20;   <description>Windows RDP Logon Failure</description>
-
-&#x20;   <group>authentication\_failures,rdp,</group>
-
-&#x20; </rule>
+ </rule>
 
 
 
-&#x20; <!-- Repeated failed RDP logons from the same IP -->
+ <!-- Identify an individual failed RDP logon -->
 
-&#x20; <rule id="100002" level="12" frequency="5" timeframe="120">
+ <rule id="100010" level="5">
 
-&#x20;   <if\_matched\_sid>100010</if\_matched\_sid>
+   <if\_sid>60105</if\_sid>
 
-&#x20;   <same\_field>win.eventdata.ipAddress</same\_field>
+   <field name="win.system.eventID">^4625$</field>
 
-&#x20;   <description>Brute Force Attack: Repeated RDP failures from the same IP within 2 minutes</description>
+   <field name="win.eventdata.logonType">^10$</field>
 
-&#x20;   <mitre>
+   <description>Windows RDP Logon Failure</description>
 
-&#x20;     <id>T1110.001</id>
+   <group>authentication\_failures,rdp,</group>
 
-&#x20;   </mitre>
+ </rule>
 
-&#x20;   <group>authentication\_failures,brute\_force,rdp,</group>
 
-&#x20; </rule>
+
+ <!-- Repeated failed RDP logons from the same IP -->
+
+ <rule id="100002" level="12" frequency="5" timeframe="120">
+
+   <if\_matched\_sid>100010</if\_matched\_sid>
+
+   <same\_field>win.eventdata.ipAddress</same\_field>
+
+   <description>Brute Force Attack: Repeated RDP failures from the same IP within 2 minutes</description>
+
+   <mitre>
+
+     <id>T1110.001</id>
+
+   </mitre>
+
+   <group>authentication\_failures,brute\_force,rdp,</group>
+
+ </rule>
 
 
 
