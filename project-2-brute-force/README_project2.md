@@ -243,8 +243,6 @@ Wrote two correlation rules in `/var/ossec/etc/rules/local\_rules.xml` to raise 
 
 > \*\*Design note:\*\* rule 100001 (`if\_matched\_sid: 60122`) fires on either host, since both Win-Server and Win-11 raise rule 60122 on failed logons — a single rule gives domain-wide coverage.
 
-> ⚠️ \*\*Known limitation:\*\* rule 60104 fires on \*every\* Windows audit failure, not just RDP, so rule 100002 is not currently RDP-specific. To scope it correctly, add a condition on `win.system.eventID` (e.g. 4776) or `logonType`, and update the description accordingly.
-
 ```bash
 # Validate rule syntax
 sudo /var/ossec/bin/wazuh-logtest
