@@ -8,7 +8,7 @@
 | **Date** | 02 October 2026 |
 | **Attacker Machine** | Kali Linux — 192.2.42.156 |
 | **Targets** | Windows Server DC (192.2.42.136) · Windows 11 Endpoint (192.2.42.137) |
-| **SIEM** | Wazuh v4.14.7 — 192.2.42.135 |
+| **SIEM** | Wazuh v4.14.7 — 192.2.42.142 |
 | **MITRE ATT&CK** | T1110 — Brute Force · T1110.001 — Password Guessing |
 
 ---
@@ -38,7 +38,7 @@ Simulate a real-world credential brute force attack from a dedicated Kali Linux 
 | Kali Linux | Attacker — simulated threat actor | 192.2.42.156 |
 | Windows Server 2022 | Target 1 — Domain Controller | 192.2.42.136 |
 | Windows 11 | Target 2 — Domain-joined endpoint | 192.2.42.137 |
-| Ubuntu / Wazuh | SIEM — defender visibility | 192.2.42.135 |
+| Ubuntu / Wazuh | SIEM — defender visibility | 192.2.42.142 |
 
 > All machines on bridged VMware LAN `192.2.42.0/24`. Kali has no Wazuh agent — all detections are defender-side only, matching real-world SOC visibility constraints.
 
@@ -107,7 +107,6 @@ Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
 ```bash
 hydra -l jay -P ~/lab-wordlist.txt rdp://192.2.42.137
-hydra -l jay -P ~/lab-wordlist.txt smb://192.2.42.137
 ```
 
 ### Key Event Fields Observed (Event ID 4776 — Win-11)
@@ -171,28 +170,73 @@ This is a false enrichment — private IP ranges cannot be accurately geolocated
 ### Rule XML
 
 ```xml
-<!-- Local rules -->
-<group name="local_rules,">
 
-  <rule id="100001" level="12" frequency="5" timeframe="120">
-    <if_matched_sid>60122</if_matched_sid>
-    <same_source_ip />
-    <description>Brute Force Attack: 5+ failed Windows logons from same IP within 2 minutes</description>
-    <mitre>
-      <id>T1110</id>
-    </mitre>
-    <group>authentication_failures,brute_force,</group>
-  </rule>
 
-  <rule id="100002" level="12" frequency="5" timeframe="120">
-    <if_matched_sid>60104</if_matched_sid>
-    <same_source_ip />
-    <description>Brute Force Attack: 5+ RDP credential failures from same source within 2 minutes</description>
-    <mitre>
-      <id>T1110.001</id>
-    </mitre>
-    <group>authentication_failures,brute_force,</group>
-  </rule>
+<group name="local\_rules,">
+
+
+
+ <!-- Repeated failed Windows logons from the same IP -->
+
+ <rule id="100001" level="12" frequency="5" timeframe="120">
+
+   <if\_matched\_sid>60122</if\_matched\_sid>
+
+   <same\_field>win.eventdata.ipAddress</same\_field>
+
+   <description>Brute Force Attack: Repeated failed Windows logons from the same IP within 2 minutes</description>
+
+   <mitre>
+
+     <id>T1110</id>
+
+   </mitre>
+
+   <group>authentication\_failures,brute\_force,</group>
+
+ </rule>
+
+
+
+ <!-- Identify an individual failed RDP logon -->
+
+ <rule id="100010" level="5">
+
+   <if\_sid>60105</if\_sid>
+
+   <field name="win.system.eventID">^4625$</field>
+
+   <field name="win.eventdata.logonType">^10$</field>
+
+   <description>Windows RDP Logon Failure</description>
+
+   <group>authentication\_failures,rdp,</group>
+
+ </rule>
+
+
+
+ <!-- Repeated failed RDP logons from the same IP -->
+
+ <rule id="100002" level="12" frequency="5" timeframe="120">
+
+   <if\_matched\_sid>100010</if\_matched\_sid>
+
+   <same\_field>win.eventdata.ipAddress</same\_field>
+
+   <description>Brute Force Attack: Repeated RDP failures from the same IP within 2 minutes</description>
+
+   <mitre>
+
+     <id>T1110.001</id>
+
+   </mitre>
+
+   <group>authentication\_failures,brute\_force,rdp,</group>
+
+ </rule>
+
+
 
 </group>
 ```
