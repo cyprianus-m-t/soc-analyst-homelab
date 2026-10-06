@@ -85,6 +85,7 @@ Get-ADUser -Filter {SamAccountName -like "svc_backup" -or SamAccountName -like "
 Both accounts were created successfully and confirmed enabled in Active Directory.
 
 > 📷 **Screenshot 1** — PowerShell Get-ADUser output confirming both `svc_backup` and `administrator2` exist with Enabled: True.
+![Accounts created](./screenshots/001-powershell-accounts-created.png)
 
 ### Key Event Fields Observed (Event ID 4720)
 
@@ -100,10 +101,13 @@ Wazuh ingested two Event ID 4720 events from Win-Server — one per account crea
 | `data.win.system.severityValue` | `AUDIT_SUCCESS` | Account creation succeeded |
 
 > 📷 **Screenshot 2** — Wazuh event list filtered to `eventID:4720` showing 2 hits — both account creation events timestamped within seconds of each other.
+![](./screenshots/002-wazuh-4720-event-list.png)
 
 > 📷 **Screenshot 3** — Wazuh Document Details for Event ID 4720 — showing `targetUserName: administrator2`, `subjectUserName: Administrator`, `data.win.system.message: "A user account was created"`.
+![](./screenshots/003-wazuh-4720-detail-administrator2.png)
 
 > 📷 **Screenshot 4** — Wazuh Document Details for second 4720 event — showing `samAccountName: svc_test3` (from second run), `subjectUserName: Administrator`, domain CCLABS.
+![](./screenshots/004-wazuh-4720-detail-svc-test3.png)
 
 ---
 
@@ -125,7 +129,8 @@ Get-ADGroupMember -Identity "Domain Admins" | Select Name, SamAccountName
 
 `svc_backup` was confirmed as a member of Domain Admins alongside the built-in Administrator account. At this point, the attacker has full domain control through a non-obvious account.
 
-> 📷 **Screenshot 5** — PowerShell Get-ADGroupMember output showing both `Administrator` and `svc_backup` listed as Domain Admins members.
+> 📷 **Screenshot 6** — PowerShell Get-ADGroupMember output showing both `Administrator` and `svc_backup` listed as Domain Admins members.
+> ![](./screenshots/006-powershell-verify-domain-admins.png)
 
 ### Key Event Fields Observed (Event ID 4728)
 
@@ -141,9 +146,10 @@ Get-ADGroupMember -Identity "Domain Admins" | Select Name, SamAccountName
 > **Note on SID -512:** The Domain Admins group always ends in SID suffix `-512`. Any event adding a member to a group with this SID suffix is automatically high priority — it represents the highest privilege in a Windows domain.
 
 > 📷 **Screenshot 6** — Wazuh Document Details for Event ID 4728 — showing `memberName: CN=svc_backup`, `targetUserName: Domain Admins`, `subjectUserName: Administrator`, `targetSid` ending -512.
+> ![](./screenshots/008-wazuh-4728-detail.png)
 
 > 📷 **Screenshot 7** — Wazuh event list filtered to `eventID:4728` showing 1 hit — rule 60159 "Domain Admins Group Changed" at Level 12.
-
+![](./screenshots/007-wazuh-4728-event-list.png)
 ---
 
 ## Attack 3 — Security Log Clearing (Event ID 1102)
@@ -160,7 +166,8 @@ Clear-EventLog -LogName Security
 
 The Security log was cleared. Windows immediately generated Event ID 1102 — the log clearing event — which was captured by Wazuh before any local evidence could be destroyed.
 
-> 📷 **Screenshot 8** — Windows Server Event Viewer showing Security log with Event ID 1102 "Log clear" at the top, timestamped Oct 6, 2026 @ 14:42 PM. Only 35 events remain after clearing.
+> 📷 **Screenshot 11** — Windows Server Event Viewer showing Security log with Event ID 1102 "Log clear" at the top, timestamped Oct 6, 2026 @ 14:42 PM. Only 35 events remain after clearing.
+![](./screenshots/011-event-viewer-1102.png)
 
 ### Key Event Fields Observed (Event ID 1102)
 
@@ -175,9 +182,12 @@ The Security log was cleared. Windows immediately generated Event ID 1102 — th
 
 > **Critical observation:** Despite the attacker clearing the Security log on the DC, Wazuh had already forwarded all prior events to the centralised SIEM. The attacker destroyed local evidence but could not reach the SIEM. This is the core value proposition of centralised log management.
 
-> 📷 **Screenshot 9** — Wazuh event list filtered to `eventID:1102` showing the "The audit log was cleared" alert (rule 63103, Level 5) firing with full field detail.
+> 📷 **Screenshot 12** — Wazuh event list filtered to `eventID:1102` showing the "The audit log was cleared" alert (rule 63103, Level 5) firing with full field detail.
+> ![](./screenshots/012-wazuh-1102-event-list.png)
 
-> 📷 **Screenshot 10** — Wazuh Document Details for Event ID 1102 — showing `subjectUserName: Administrator`, `subjectDomainName: CCLABS`, message: "The audit log was cleared."
+> 📷 **Screenshot 13/14** — Wazuh Document Details for Event ID 1102 — showing `subjectUserName: Administrator`, `subjectDomainName: CCLABS`, message: "The audit log was cleared."
+![](./screenshots/013-wazuh-1102-detail.png)
+![](./screenshots/014-wazuh-1102-detail.png)
 
 ---
 
@@ -200,7 +210,8 @@ Before custom rules were deployed, Wazuh's built-in ruleset detected the followi
 ### Rule File Location
 `/var/ossec/etc/rules/local_rules.xml`
 
-> 📷 **Screenshot 11** — local_rules.xml in nano showing all five custom rules (100001–100005) correctly formatted and deployed.
+> 📷 **Screenshot 15** — local_rules.xml in nano showing all five custom rules (100001–100005) correctly formatted and deployed.
+![](./screenshots/015-local-rules-xml.png)
 
 ### Rule XML (AD-Specific Rules)
 
@@ -262,11 +273,14 @@ sudo systemctl status wazuh-manager
 
 ### Custom Rules Firing
 
-> 📷 **Screenshot 12** — Wazuh alert — rule **100003** firing at Level 12, description "AD Attack: new domain user account created", Event ID 4720, Win-Server, Oct 6 @ 16:48.
+> 📷 **Screenshot 16** — Wazuh alert — rule **100003** firing at Level 12, description "AD Attack: new domain user account created", Event ID 4720, Win-Server, Oct 6 @ 16:48.
+![](./screenshots/016-rule-100003-firing.png)
 
-> 📷 **Screenshot 13** — Wazuh alert — rule **100004** firing at Level 14, description "AD Attack: Account added to pri...", Event ID 4728, Win-Server, Oct 6 @ 16:52.
+> 📷 **Screenshot 18** — Wazuh alert — rule **100004** firing at Level 14, description "AD Attack: Account added to pri...", Event ID 4728, Win-Server, Oct 6 @ 16:52.
+![](./screenshots/018-rule-100004-firing.png)
 
-> 📷 **Screenshot 14** — Wazuh alert — rule **100005** firing at Level 15, description "AD Attack: Windows Security event log cleared (possible evidence dest...", Event ID 1102, Win-Server, Oct 6 @ 16:53.
+> 📷 **Screenshot 20** — Wazuh alert — rule **100005** firing at Level 15, description "AD Attack: Windows Security event log cleared (possible evidence dest...", Event ID 1102, Win-Server, Oct 6 @ 16:53.
+![](./screenshots/020-rule-100005-firing.png)
 
 ---
 
