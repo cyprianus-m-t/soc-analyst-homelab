@@ -108,7 +108,6 @@ Wazuh ingested two Event ID 4720 events from Win-Server — one per account crea
 
 > 📷 **Screenshot 4 & 5** — Wazuh Document Details for second 4720 event — showing `samAccountName: svc_test3` (from second run), `subjectUserName: Administrator`, domain CCLABS.
 ![](./screenshots/004-wazuh-4720-detail-svc-test3.png)
->
 ![](./screenshots/005-wazuh-4720-details-ext.png)
 
 ---
