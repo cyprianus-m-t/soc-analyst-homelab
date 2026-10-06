@@ -106,8 +106,10 @@ Wazuh ingested two Event ID 4720 events from Win-Server — one per account crea
 > 📷 **Screenshot 3** — Wazuh Document Details for Event ID 4720 — showing `targetUserName: administrator2`, `subjectUserName: Administrator`, `data.win.system.message: "A user account was created"`.
 ![](./screenshots/003-wazuh-4720-detail-administrator2.png)
 
-> 📷 **Screenshot 4** — Wazuh Document Details for second 4720 event — showing `samAccountName: svc_test3` (from second run), `subjectUserName: Administrator`, domain CCLABS.
+> 📷 **Screenshot 4 & 5** — Wazuh Document Details for second 4720 event — showing `samAccountName: svc_test3` (from second run), `subjectUserName: Administrator`, domain CCLABS.
 ![](./screenshots/004-wazuh-4720-detail-svc-test3.png)
+>
+![](./screenshots/005-wazuh-4720-details-ext.png)
 
 ---
 
@@ -145,11 +147,14 @@ Get-ADGroupMember -Identity "Domain Admins" | Select Name, SamAccountName
 
 > **Note on SID -512:** The Domain Admins group always ends in SID suffix `-512`. Any event adding a member to a group with this SID suffix is automatically high priority — it represents the highest privilege in a Windows domain.
 
-> 📷 **Screenshot 6** — Wazuh Document Details for Event ID 4728 — showing `memberName: CN=svc_backup`, `targetUserName: Domain Admins`, `subjectUserName: Administrator`, `targetSid` ending -512.
-> ![](./screenshots/008-wazuh-4728-detail.png)
-
 > 📷 **Screenshot 7** — Wazuh event list filtered to `eventID:4728` showing 1 hit — rule 60159 "Domain Admins Group Changed" at Level 12.
 ![](./screenshots/007-wazuh-4728-event-list.png)
+
+> 📷 **Screenshot 8** — Wazuh Document Details for Event ID 4728 — showing `memberName: CN=svc_backup`, `targetUserName: Domain Admins`, `subjectUserName: Administrator`, `targetSid` ending -512.
+![](./screenshots/008-wazuh-4728-detail.png)
+>
+![](./screenshots/009-wazuh-4728-detail-ext.png).
+
 ---
 
 ## Attack 3 — Security Log Clearing (Event ID 1102)
