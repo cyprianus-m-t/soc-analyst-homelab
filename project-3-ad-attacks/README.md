@@ -280,12 +280,12 @@ sudo systemctl status wazuh-manager
 
 > 📷 **Screenshot 16** — Wazuh alert — rule **100003** firing at Level 12, description "AD Attack: new domain user account created", Event ID 4720, Win-Server, Oct 6 @ 16:48.
 ![](./screenshots/016-rule-100003-firing.png)
-> 
+
 ![](./screenshots/016-rule-100003-firing-details.png)
 
 > 📷 **Screenshot 18** — Wazuh alert — rule **100004** firing at Level 14, description "AD Attack: Account added to pri...", Event ID 4728, Win-Server, Oct 6 @ 16:52.
 ![](./screenshots/018-rule-100004-firing.png)
-> 
+
 ![](./screenshots/018-rule-100004-firing-details.png)
 
 > 📷 **Screenshot 20** — Wazuh alert — rule **100005** firing at Level 15, description "AD Attack: Windows Security event log cleared (possible evidence dest...", Event ID 1102, Win-Server, Oct 6 @ 16:53.
