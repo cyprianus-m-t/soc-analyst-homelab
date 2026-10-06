@@ -6,8 +6,8 @@
 |---|---|
 | **Author** | Mojaki Tjeeka |
 | **Date** | 06 October 2026 |
-| **Target Machine** | Windows Server 2022 — Domain Controller (192.2.42.136) |
-| **SIEM** | Wazuh v4.14.7 — 192.2.42.135 |
+| **Target Machine** | Windows Server  — Domain Controller (192.2.42.136) |
+| **SIEM** | Wazuh v4.14.7 — 192.2.42.142 |
 | **Domain** | CCLABS (cclabs.local) |
 | **MITRE ATT&CK** | T1136.001 — Create Account: Domain Account · T1098.007 — Account Manipulation: Add Office 365 Global Administrator Role (used here for Domain Admins escalation) · T1070.001 — Indicator Removal: Clear Windows Event Logs |
 
@@ -36,7 +36,7 @@ Simulate three high-impact Active Directory attack techniques on the Domain Cont
 | Component | Role | IP |
 |---|---|---|
 | Windows Server 2022 | Target — Domain Controller | 192.2.42.136 |
-| Ubuntu / Wazuh | SIEM — defender visibility | 192.2.42.135 |
+| Ubuntu / Wazuh | SIEM — defender visibility | 192.2.42.142 |
 | Windows 11 | Domain-joined endpoint (monitored) | 192.2.42.137 |
 
 > All attacks simulated from an Administrator PowerShell session on the DC — representing an attacker who has already achieved initial access and is operating with elevated privileges.
