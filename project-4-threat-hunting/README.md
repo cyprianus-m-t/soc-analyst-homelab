@@ -9,7 +9,7 @@
 |**Analyst Role**|Tier 1 SOC Analyst|
 |**Environment**|Wazuh v4.14.7 — 192.2.42.142|
 |**Monitored Asset**|Win-Server — Windows Server 2012 DC (192.2.42.136, Agent ID: 001)|
-|**Hunt Window**|Oct 6–7, 2026 (Last 24 hours)|
+|**Hunt Window**|Oct 6–7, 2026 |
 |**MITRE ATT\&CK**|T1110 — Brute Force · T1136.001 — Create Account: Domain Account · T1098.007 — Account Manipulation · T1070.001 — Indicator Removal: Clear Windows Event Logs|
 
 \---
