@@ -53,7 +53,9 @@ Threat hunting is proactive — it does not wait for a page or alert. The analys
 
 **Analyst observation:** Eight high-severity alerts across two time clusters — one spanning \~3 hours on Oct 6, and one at 12:12–12:16 on Oct 7. The presence of four distinct rule IDs covering brute force, account creation, privilege escalation, and evidence destruction is immediately suspicious. This pattern maps to a structured attack chain, not random noise.
 
-> 📷 Screenshot 1 — High-severity query results showing 8 hits across rules 100001, 100003, 100004, 100005
+> 📷 Screenshot 1 — High-severity query results showing 8 hits across rules 100001, 100003, 100004, 100005![Accounts created]
+![](./screenshots/01-hunt-high-severity.png)
+
 
 \---
 
@@ -71,6 +73,7 @@ Threat hunting is proactive — it does not wait for a page or alert. The analys
 **Analyst observation:** Twelve failed logons with a dense cluster at 12:12. The time chart shows a sharp single spike — characteristic of an automated tool, not a user mistyping a password. Rule 100001 (custom brute force correlation) fired at Level 12, confirming 5+ failures from the same source IP within 2 minutes. The individual 4625 events at Level 5 would likely be filtered out in a high-volume environment — the correlated rule 100001 is what surfaces this as actionable.
 
 > 📷 Screenshot 2 — Event ID 4625 query showing 12 hits, dense spike at 12:12, rule 100001 at Level 12 visible at top of list
+![](./screenshots/02-hunt-4625-brute-force.png)
 
 \---
 
@@ -89,7 +92,9 @@ Threat hunting is proactive — it does not wait for a page or alert. The analys
 **Analyst observation:** Five account creation events across two days — two caught by the custom rule 100003, three by the pre-built rule 60109. All created by the Administrator account. Notable: the most recent creation (Oct 7 @ 12:16:05) occurred **within 4 minutes** of the brute force burst at 12:12 — a tight temporal correlation that strongly suggests the brute force and the account creation are related actions by the same actor. The account name `svc\_monitor` mimics a legitimate monitoring service account — a classic attacker naming technique to avoid detection during casual review.
 
 > 📷 Screenshot 3 — Event ID 4720 query showing 5 hits across both days, rule 100003 and 60109 visible
+![Accounts created](./screenshots/03-hunt-4720-account-creation.png)
 > 📷 Screenshot 4 — Document Details for most recent 4720 event — targetUserName: svc\_monitor, subjectUserName: Administrator, domain: CCLABS
+![](./screenshots/04-hunt-4720-svc-monitor-detail.png)
 
 \---
 
@@ -109,6 +114,7 @@ Threat hunting is proactive — it does not wait for a page or alert. The analys
 **Analyst observation:** Domain Admins was modified three times, and pivoting on the `memberName` field confirmed the same account — `svc\_test3` — was added each time. This is significant for two reasons: first, any modification to Domain Admins is critical; second, the repetition (same account added three times in one afternoon) suggests either automated execution or an attacker re-running an escalation script after each log clearing. The SID suffix `-512` on the target group is a reliable indicator that Domain Admins specifically was targeted, not a lower-privilege group.
 
 > 📷 Screenshot 5 — Event ID 4728 query showing 3 hits — rule 100004 (Level 14) and rule 60159 (Level 12) both visible
+![](./screenshots/05-hunt-4728-da-escalation.png)
 
 \---
 
@@ -127,6 +133,7 @@ Threat hunting is proactive — it does not wait for a page or alert. The analys
 **Analyst observation:** The Security log was cleared three times in approximately 2 hours — at 14:42, 15:59, and 16:53. Each clearing immediately followed a Domain Admins modification (at 14:35, 15:58, 16:52). This is a deliberate destroy-evidence pattern: escalate, then erase. The attacker could not reach the Wazuh SIEM — centralised log management preserved all three clearing events and everything that preceded them. Note also that two of the three clearing events only triggered the pre-built rule at Level 5 — below typical SOC escalation thresholds. The custom rule 100005 at Level 15 only caught the third. **This is a detection gap worth noting:** the first two log-clearing events would have been easy to miss without the hunt query.
 
 > 📷 Screenshot 6 — Event ID 1102 query showing 3 hits — rule 100005 Level 15 and two rule 63103 Level 5 events visible
+![](./screenshots/06-hunt-1102-log-clearing.png)
 
 \---
 
