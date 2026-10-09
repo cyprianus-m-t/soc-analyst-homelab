@@ -26,7 +26,7 @@ Each alert was triaged using a structured analyst workflow: false positive vs. t
 
 | Component | Details |
 |---|---|
-| SIEM / FIM Engine | Wazuh 4.x — 192.2.42.142 (Ubuntu Server) |
+| SIEM / FIM Engine | Wazuh 4.14.7 — 192.2.42.142 (Ubuntu Server) |
 | Monitored Host | WIN-SERVER — 192.2.42.136 (Windows Server 2012 R2) |
 | Domain | cclabs.local |
 | Monitored Directories | C:\SensitiveData, C:\Windows\System32, C:\Windows\SysWOW64, C:\Program Files |
