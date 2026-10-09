@@ -28,6 +28,7 @@ mirroring real SOC visibility constraints
 | 3 | [Active Directory Attack Detection](./project-3-ad-attacks/) | AD security, privilege escalation detection, log analysis |
 | 4 | [Threat Hunting](./project-4-threat-hunting/) | Proactive hunting, Wazuh queries, lateral movement detection |
 | 5 | [Incident Response Simulation](./project-5-incident-response/) | Full IR lifecycle, forensic preservation, IR report writing |
+| 6 | [File Integrity Monitoring](./project-6-file-integrity-monitoring/) | FIM configuration, Wazuh syscheck, MITRE ATT&CK mapping |
 
 ## Tools & Technologies
 - Wazuh SIEM/XDR
